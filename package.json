@@ -16,7 +16,8 @@
     "format": "biome check --write .",
     "build": "pnpm typecheck && electron-vite build",
     "start": "electron-vite preview",
-    "package": "pnpm build && electron-builder --win nsis"
+    "package": "pnpm build && electron-builder --win nsis",
+    "electron:install": "node node_modules/electron/install.js"
   },
   "dependencies": {
     "react": "^19.3.1",
