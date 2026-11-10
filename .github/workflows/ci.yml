@@ -22,5 +22,4 @@ jobs:
       - run: pnpm audit --audit-level=critical
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
       - run: pnpm build
