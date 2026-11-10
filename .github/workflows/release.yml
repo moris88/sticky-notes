@@ -1,0 +1,58 @@
+name: Release
+
+# Alla pubblicazione di una release GitHub (es. tag v2.1.0) crea zip Windows e zip/AppImage/deb Linux
+# e li carica tra gli asset della release. Il tag diventa la versione dell'app (mostrata in Impostazioni).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag della release esistente (es. v2.1.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win zip
+            files: dist/*.zip
+          - os: ubuntu-latest
+            target: --linux zip AppImage deb
+            files: dist/*.zip dist/*.AppImage dist/*.deb
+    runs-on: ${{ matrix.os }}
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Imposta la versione dal tag
+        shell: bash
+        run: |
+          VERSIONE="${TAG#v}"
+          npm pkg set version="$VERSIONE"
+          echo "Versione app: $VERSIONE"
+
+      - run: pnpm build
+      - run: pnpm exec electron-builder ${{ matrix.target }} --x64 --publish never
+
+      - name: Carica i pacchetti nella release
+        shell: bash
+        run: gh release upload "$TAG" ${{ matrix.files }} --clobber

@@ -1,0 +1,6 @@
+# Impostazioni pnpm 11 (sostituiscono il vecchio campo "pnpm" di package.json).
+# Script di build consentiti: Electron scarica il proprio binario, esbuild il proprio eseguibile.
+allowBuilds:
+  electron: true
+  esbuild: true
+  electron-winstaller: false

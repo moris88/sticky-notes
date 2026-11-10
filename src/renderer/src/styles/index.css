@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Tema controllato da una classe `dark` su <html> (non dalla preferenza di sistema). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Stile "carta e inchiostro" (come Jotilla): colori, font monospazio, angoli netti, ombre piene. */
+  /* Colori delle note: "bg-note-sand" è la nota di default (Gialla). */
+  --color-note-sand: #fff09b;
+  --color-note-mint: #f8f7ef;
+  --color-note-sky: #c9e5f8;
+  --color-note-rose: #f8d0d8;
+  --color-note-lavender: #e9e8de;
+  --color-ink: #292921;
+  --color-paper: #f8f7ef;
+  --color-muted: #626253;
+  --color-line: #aaa99b;
+  --font-sans: "Courier New", Courier, monospace;
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+
+  --shadow-md: 3px 3px 0 0 rgba(37, 42, 39, 0.25);
+  --shadow-lg: 3px 3px 0 0 rgba(37, 42, 39, 0.25);
+  --shadow-xl: 3px 3px 0 0 rgba(37, 42, 39, 0.25);
+}
+
+/* Elementi interattivi con il focus o selezionati: niente bordo. Il contorno di focus del browser resta. */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+[role='button']:focus,
+input:checked,
+[aria-selected='true'],
+[aria-pressed='true'],
+[aria-current='page'] {
+  border-color: transparent;
+}
