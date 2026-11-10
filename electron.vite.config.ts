@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
 
 // Alias comuni: il codice condiviso si importa sempre come @shared/...
 const shared = resolve('src/shared')
@@ -16,12 +16,11 @@ const devWithoutCsp = {
 }
 
 export default defineConfig({
+  // build.externalizeDeps è attivo di default per main e preload
   main: {
-    plugins: [externalizeDepsPlugin()],
     resolve: { alias: { '@shared': shared } },
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
     resolve: { alias: { '@shared': shared } },
   },
   renderer: {
