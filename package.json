@@ -2,7 +2,11 @@
   "name": "sticky-notes",
   "version": "1.0.0",
   "description": "Note adesive desktop per Windows 11 con Markdown, scadenze, tag e vista calendario",
-  "author": "Maurizio",
+  "author": {
+    "name": "Maurizio Tolomeo",
+    "email": "maurizio.tolomeo@outlook.it",
+    "site": "https://mauriziotolomeo.it"
+  },
   "private": true,
   "main": "out/main/index.js",
   "scripts": {
