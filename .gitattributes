@@ -1,0 +1,8 @@
+# Fine riga LF ovunque, anche nei checkout su Windows (Biome richiede LF: con CRLF la CI fallisce)
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.jar binary
+*.db binary
