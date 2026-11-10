@@ -53,11 +53,20 @@ export async function moveLooseNotesIntoFolder(storageDir: string): Promise<numb
   const notesDir = notesFolderOf(storageDir);
   await fs.mkdir(notesDir, { recursive: true });
 
-  const loose = (await fs.readdir(storageDir, { withFileTypes: true })).filter(
+  const candidates = (await fs.readdir(storageDir, { withFileTypes: true })).filter(
     (e) => e.isFile() && e.name.endsWith('.md'),
   );
-  for (const entry of loose) {
-    await fs.rename(path.join(storageDir, entry.name), path.join(notesDir, entry.name));
+
+  // Si spostano solo i file che sono davvero note (front matter valido, nome = id.md).
+  // Gli altri .md della cartella (es. README.md) restano dove sono.
+  let moved = 0;
+  for (const entry of candidates) {
+    const from = path.join(storageDir, entry.name);
+    const note = parseNote(await fs.readFile(from, 'utf-8'));
+    if (!note || !ID_PATTERN.test(note.id) || entry.name !== `${note.id}.md`) continue;
+
+    await fs.rename(from, path.join(notesDir, entry.name));
+    moved += 1;
   }
-  return loose.length;
+  return moved;
 }

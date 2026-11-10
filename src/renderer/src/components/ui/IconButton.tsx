@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 interface IconButtonProps {
-  label: string; // testo per screen reader e tooltip
-  onClick: () => void;
-  children: ReactNode;
+  label: string // testo per screen reader e tooltip
+  onClick: () => void
+  children: ReactNode
 }
 
 /** Pulsante solo icona, accessibile grazie all'etichetta. */
@@ -18,5 +18,5 @@ export function IconButton({ label, onClick, children }: IconButtonProps) {
     >
       {children}
     </button>
-  );
+  )
 }

@@ -32,10 +32,10 @@ input:focus,
 textarea:focus,
 select:focus,
 button:focus,
-[role='button']:focus,
+[role="button"]:focus,
 input:checked,
-[aria-selected='true'],
-[aria-pressed='true'],
-[aria-current='page'] {
+[aria-selected="true"],
+[aria-pressed="true"],
+[aria-current="page"] {
   border-color: transparent;
 }

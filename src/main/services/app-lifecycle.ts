@@ -1,27 +1,27 @@
-import { app, BrowserWindow, dialog, Notification } from 'electron';
+import { app, type BrowserWindow, dialog, Notification } from 'electron'
 
 // Stato dell'uscita: l'uscita reale avviene solo dopo conferma esplicita dell'utente
 // (o quando Windows sta spegnendo/chiudendo la sessione, dove non si può chiedere nulla).
-let quitConfirmed = false;
-let sessionEnding = false;
+let quitConfirmed = false
+let sessionEnding = false
 
 export const markSessionEnding = (): void => {
-  sessionEnding = true;
-};
+  sessionEnding = true
+}
 
-export const isQuitting = (): boolean => quitConfirmed || sessionEnding;
+export const isQuitting = (): boolean => quitConfirmed || sessionEnding
 
-let backgroundNoticeShown = false;
+let backgroundNoticeShown = false
 
 /** Nasconde la dashboard nel tray. La prima volta avvisa l'utente di come riaprirla. */
 export function hideToBackground(win: BrowserWindow): void {
-  win.hide();
+  win.hide()
   if (!backgroundNoticeShown && Notification.isSupported()) {
-    backgroundNoticeShown = true;
+    backgroundNoticeShown = true
     new Notification({
       title: 'Note adesive è in background',
       body: "Per riaprire la dashboard clicca l'icona nel tray (accanto all'orologio) oppure avvia di nuovo l'app.",
-    }).show();
+    }).show()
   }
 }
 
@@ -36,11 +36,11 @@ export async function askCloseAction(win: BrowserWindow): Promise<void> {
     buttons: ['Metti in background', 'Chiudi app', 'Annulla'],
     defaultId: 0,
     cancelId: 2,
-  });
-  if (response === 0) hideToBackground(win);
+  })
+  if (response === 0) hideToBackground(win)
   if (response === 1) {
-    quitConfirmed = true;
-    app.quit();
+    quitConfirmed = true
+    app.quit()
   }
 }
 
@@ -54,9 +54,9 @@ export async function askToQuit(): Promise<void> {
     buttons: ['Chiudi', 'Annulla'],
     defaultId: 1,
     cancelId: 1,
-  });
+  })
   if (response === 0) {
-    quitConfirmed = true;
-    app.quit();
+    quitConfirmed = true
+    app.quit()
   }
 }

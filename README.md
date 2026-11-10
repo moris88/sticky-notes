@@ -5,7 +5,7 @@ App desktop con Electron, React, TypeScript e Tailwind CSS v4.
 ## Requisiti
 
 - Node.js 24 o superiore
-- pnpm 10 o superiore (`npm i -g pnpm`)
+- pnpm 11 o superiore
 
 ## Comandi
 

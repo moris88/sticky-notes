@@ -1,39 +1,39 @@
-import { app, BrowserWindow, shell, type WebPreferences } from 'electron';
-import { join } from 'node:path';
-import { askCloseAction, isQuitting } from './services/app-lifecycle';
-import { currentSettings } from './services/settings-store';
+import { join } from 'node:path'
+import { app, BrowserWindow, shell, type WebPreferences } from 'electron'
+import { askCloseAction, isQuitting } from './services/app-lifecycle'
+import { currentSettings } from './services/settings-store'
 
 // Palette "carta e inchiostro" (come Jotilla): stessi valori del tema del renderer.
-const PAPER = '#f8f7ef';
-const INK = '#292921';
-const TITLE_BAR_HEIGHT = 40;
+const PAPER = '#f8f7ef'
+const INK = '#292921'
+const TITLE_BAR_HEIGHT = 40
 
 /** Colori dei controlli di Windows nella barra del titolo: seguono il tema dell'app. */
 function titleBarColors(dark: boolean): { color: string; symbolColor: string; backgroundColor: string } {
   return dark
     ? { color: INK, symbolColor: PAPER, backgroundColor: INK }
-    : { color: PAPER, symbolColor: INK, backgroundColor: PAPER };
+    : { color: PAPER, symbolColor: INK, backgroundColor: PAPER }
 }
 
 /** Finestre principali aperte (la dashboard): le sole che hanno la barra del titolo nascosta. */
-const mainWindows = new Set<BrowserWindow>();
+const mainWindows = new Set<BrowserWindow>()
 
 /** Applica il tema alla finestra principale: colori dei controlli e sfondo. */
 function applyWindowTheme(win: BrowserWindow, dark: boolean): void {
-  const { color, symbolColor, backgroundColor } = titleBarColors(dark);
-  win.setTitleBarOverlay({ color, symbolColor, height: TITLE_BAR_HEIGHT });
-  win.setBackgroundColor(backgroundColor);
+  const { color, symbolColor, backgroundColor } = titleBarColors(dark)
+  win.setTitleBarOverlay({ color, symbolColor, height: TITLE_BAR_HEIGHT })
+  win.setBackgroundColor(backgroundColor)
 }
 
 /** Chiamata quando cambia il tema nelle impostazioni: aggiorna tutte le finestre principali. */
 export function applyThemeToMainWindows(dark: boolean): void {
   for (const win of mainWindows) {
-    if (!win.isDestroyed()) applyWindowTheme(win, dark);
+    if (!win.isDestroyed()) applyWindowTheme(win, dark)
   }
 }
 
 /** Icona dell'app: la stessa per finestra principale, post-it e installer. */
-export const APP_ICON_PATH = join(app.getAppPath(), 'build', 'icon.ico');
+export const APP_ICON_PATH = join(app.getAppPath(), 'build', 'icon.ico')
 
 /** Preferenze di sicurezza comuni a tutte le finestre (principale e post-it). */
 export const SECURE_WEB_PREFERENCES: WebPreferences = {
@@ -41,27 +41,27 @@ export const SECURE_WEB_PREFERENCES: WebPreferences = {
   contextIsolation: true,
   sandbox: true,
   nodeIntegration: false,
-};
+}
 
 /**
  * Carica il renderer nella finestra. I parametri (es. mode=sticky&id=...) finiscono nell'URL
  * e permettono al renderer di capire quale vista mostrare.
  */
 export function loadRenderer(win: BrowserWindow, query: Record<string, string> = {}): void {
-  const devUrl = process.env['ELECTRON_RENDERER_URL'];
+  const devUrl = process.env.ELECTRON_RENDERER_URL
   if (devUrl) {
-    const url = new URL(devUrl);
-    for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
-    void win.loadURL(url.toString());
+    const url = new URL(devUrl)
+    for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v)
+    void win.loadURL(url.toString())
   } else {
-    void win.loadFile(join(__dirname, '../renderer/index.html'), { query });
+    void win.loadFile(join(__dirname, '../renderer/index.html'), { query })
   }
 }
 
 /** Crea la finestra principale con le impostazioni di sicurezza consigliate. */
 export function createMainWindow(): BrowserWindow {
-  const dark = currentSettings().theme === 'dark';
-  const { color, symbolColor, backgroundColor } = titleBarColors(dark);
+  const dark = currentSettings().theme === 'dark'
+  const { color, symbolColor, backgroundColor } = titleBarColors(dark)
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -76,34 +76,39 @@ export function createMainWindow(): BrowserWindow {
     roundedCorners: false, // angoli netti, come nel resto dello stile
     autoHideMenuBar: true, // niente barra dei menu: si mostra solo con Alt
     webPreferences: SECURE_WEB_PREFERENCES,
-  });
+  })
 
-  mainWindows.add(win);
-  win.on('closed', () => mainWindows.delete(win));
+  mainWindows.add(win)
+  win.on('closed', () => mainWindows.delete(win))
 
-  win.once('ready-to-show', () => win.show());
+  win.once('ready-to-show', () => {
+    win.show()
+    // DevTools solo con ENVIRONMENT=development. Si aprono dopo che la finestra è visibile:
+    // se aperti prima, su Windows la finestra staccata può non comparire.
+    if (process.env.ENVIRONMENT === 'development') {
+      win.webContents.openDevTools({ mode: 'detach' })
+      // Diagnostica: conferma nel terminale se i DevTools risultano aperti davvero.
+      console.log(`[Note adesive] DevTools aperti: ${win.webContents.isDevToolsOpened()}`)
+    }
+  })
 
   // Alla X si chiede: metti in background (tray) oppure chiudi l'app.
   win.on('close', (event) => {
-    if (isQuitting()) return;
-    event.preventDefault();
-    void askCloseAction(win);
-  });
+    if (isQuitting()) return
+    event.preventDefault()
+    void askCloseAction(win)
+  })
 
   // I link esterni si aprono nel browser predefinito, non in una finestra Electron.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    void shell.openExternal(url);
-    return { action: 'deny' };
-  });
+    void shell.openExternal(url)
+    return { action: 'deny' }
+  })
 
-  loadRenderer(win);
+  loadRenderer(win)
 
-  // DevTools solo se avvii con ENVIRONMENT=development (es. $env:ENVIRONMENT="development"; pnpm dev).
   // Il log compare nel terminale di pnpm dev e mostra il valore letto dal processo.
-  console.log(`[Note adesive] ENVIRONMENT = ${process.env['ENVIRONMENT'] ?? '(non impostata)'}`);
-  if (process.env['ENVIRONMENT'] === 'development') {
-    win.webContents.openDevTools({ mode: 'detach' });
-  }
+  console.log(`[Note adesive] ENVIRONMENT = ${process.env.ENVIRONMENT ?? '(non impostata)'}`)
 
-  return win;
+  return win
 }

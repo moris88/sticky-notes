@@ -7,5 +7,5 @@ export function formatDueDate(iso: string): string {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  });
+  })
 }

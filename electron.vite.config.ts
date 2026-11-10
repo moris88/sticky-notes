@@ -1,10 +1,10 @@
-import { resolve } from 'node:path';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 
 // Alias comuni: il codice condiviso si importa sempre come @shared/...
-const shared = resolve('src/shared');
+const shared = resolve('src/shared')
 
 // In sviluppo rimuove la CSP da index.html: il preamble di React Refresh è uno script inline
 // che la CSP bloccherebbe, e il dev server usa WebSocket per l'HMR. In produzione la CSP resta.
@@ -13,7 +13,7 @@ const devWithoutCsp = {
   apply: 'serve' as const,
   transformIndexHtml: (html: string) =>
     html.replace(/<meta\s+http-equiv="Content-Security-Policy"[^>]*>/, ''),
-};
+}
 
 export default defineConfig({
   main: {
@@ -34,4 +34,4 @@ export default defineConfig({
       },
     },
   },
-});
+})

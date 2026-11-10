@@ -1,14 +1,59 @@
-import { useEffect, useState } from 'react';
-import { useStickyNote } from '../../hooks/useStickyNote';
-import { renderMarkdown } from '../../lib/markdown';
-import { NOTE_COLOR_CLASSES, NOTE_CONTENT_CLASSES } from '../../lib/note-colors';
-import { HIGHLIGHT_CLASSES, isHighlighted } from '../../lib/note-highlight';
-import { displayTitle } from '../../lib/note-title';
-import { IconButton } from '../ui/IconButton';
-import { CloseIcon, CollapseIcon, EditIcon, ExpandIcon, TrashIcon } from '../ui/icons';
+import { createElement, type ReactNode, useEffect, useState } from 'react'
+import { useStickyNote } from '../../hooks/useStickyNote'
+import { renderMarkdown } from '../../lib/markdown'
+import { NOTE_COLOR_CLASSES, NOTE_CONTENT_CLASSES } from '../../lib/note-colors'
+import { HIGHLIGHT_CLASSES, isHighlighted } from '../../lib/note-highlight'
+import { displayTitle } from '../../lib/note-title'
+import { IconButton } from '../ui/IconButton'
+import { CloseIcon, CollapseIcon, EditIcon, ExpandIcon, TrashIcon } from '../ui/icons'
+
+const MARKDOWN_TAGS = new Set([
+  'p',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'strong',
+  'em',
+  'del',
+  'code',
+  'pre',
+  'blockquote',
+  'ul',
+  'ol',
+  'li',
+  'br',
+  'hr',
+  'a',
+])
+
+function markdownToNodes(html: string): ReactNode[] {
+  const parsed = new DOMParser().parseFromString(html, 'text/html')
+
+  const convert = (node: Node, key: number): ReactNode => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent
+    if (!(node instanceof HTMLElement)) return null
+
+    const tag = node.tagName.toLowerCase()
+    const children = Array.from(node.childNodes).map((child, index) => convert(child, index))
+    if (!MARKDOWN_TAGS.has(tag)) return children
+
+    if (tag === 'a') {
+      const href = node.getAttribute('href')
+      if (!href || !/^(https?:|mailto:)/i.test(href)) return children
+      return createElement('a', { key, href, target: '_blank', rel: 'noopener noreferrer' }, children)
+    }
+
+    return createElement(tag, { key }, children)
+  }
+
+  return Array.from(parsed.body.childNodes).map((node, index) => convert(node, index))
+}
 
 interface StickyWindowProps {
-  noteId: string;
+  noteId: string
 }
 
 /**
@@ -16,17 +61,17 @@ interface StickyWindowProps {
  * trascinabile e pulsanti per modificare, eliminare, ridurre/espandere e chiudere.
  */
 export function StickyWindow({ noteId }: StickyWindowProps) {
-  const { note, loaded, collapsed, save, toggleCollapse } = useStickyNote(noteId);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { note, loaded, collapsed, save, toggleCollapse } = useStickyNote(noteId)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   // Finché non si scrive, la bozza segue sempre il contenuto della nota.
   useEffect(() => {
-    if (!editing && note) setDraft(note.content);
-  }, [note, editing]);
+    if (!editing && note) setDraft(note.content)
+  }, [note, editing])
 
-  if (!loaded) return <div className="h-screen bg-note-sand" />;
+  if (!loaded) return <div className="h-screen bg-note-sand" />
 
   if (!note) {
     return (
@@ -36,41 +81,43 @@ export function StickyWindow({ noteId }: StickyWindowProps) {
           Chiudi
         </button>
       </div>
-    );
+    )
   }
 
   const reportError = (action: string, err: unknown) => {
-    console.error(`[Post-it] ${action} fallito:`, err);
-    setError(`${action} non riuscito: ${err instanceof Error ? err.message : String(err)}`);
-  };
+    console.error(`[Post-it] ${action} fallito:`, err)
+    setError(`${action} non riuscito: ${err instanceof Error ? err.message : String(err)}`)
+  }
 
   const finishEditing = async () => {
-    setEditing(false);
-    if (draft === note.content) return;
+    setEditing(false)
+    if (draft === note.content) return
     try {
-      await save({ ...note, content: draft });
-      setError(null);
+      await save({ ...note, content: draft })
+      setError(null)
     } catch (err) {
-      reportError('Salvataggio', err);
+      reportError('Salvataggio', err)
     }
-  };
+  }
 
   const startEditing = () => {
-    if (collapsed) void toggleCollapse(); // per modificare bisogna prima espandere
-    setEditing(true);
-  };
+    if (collapsed) void toggleCollapse() // per modificare bisogna prima espandere
+    setEditing(true)
+  }
+
+  const markdown = renderMarkdown(note.content)
 
   const handleDelete = async () => {
     if (!window.confirm(`Eliminare la nota "${displayTitle(note)}"? L'operazione non è reversibile.`)) {
-      return;
+      return
     }
     try {
       // Il main chiude questo post-it dopo aver eliminato il file.
-      await window.desktop.notes.remove(note.id);
+      await window.desktop.notes.remove(note.id)
     } catch (err) {
-      reportError('Eliminazione', err);
+      reportError('Eliminazione', err)
     }
-  };
+  }
 
   return (
     <div
@@ -108,7 +155,6 @@ export function StickyWindow({ noteId }: StickyWindowProps) {
           )}
           {editing ? (
             <textarea
-              autoFocus
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onBlur={() => void finishEditing()}
@@ -116,19 +162,16 @@ export function StickyWindow({ noteId }: StickyWindowProps) {
               className="min-h-0 flex-1 resize-none bg-transparent font-mono text-sm outline-none"
             />
           ) : (
-            <div
-              role="button"
-              tabIndex={0}
+            <button
+              type="button"
               onClick={startEditing}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') startEditing();
+                if (e.key === 'Enter') startEditing()
               }}
               className={`${NOTE_CONTENT_CLASSES} min-h-0 flex-1 cursor-text overflow-auto`}
-              // Sicuro: renderMarkdown escapa tutto l'input prima di generare i tag.
-              dangerouslySetInnerHTML={{
-                __html: renderMarkdown(note.content) || '<p>Clicca per scrivere…</p>',
-              }}
-            />
+            >
+              {markdown ? markdownToNodes(markdown) : <p>Clicca per scrivere…</p>}
+            </button>
           )}
           {note.tags.length > 0 && (
             <footer className="mt-2 flex shrink-0 flex-wrap gap-1 text-xs text-ink">
@@ -142,5 +185,5 @@ export function StickyWindow({ noteId }: StickyWindowProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

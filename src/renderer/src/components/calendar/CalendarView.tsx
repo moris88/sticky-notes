@@ -1,23 +1,23 @@
-import { useMemo, useState } from 'react';
-import type { Note } from '@shared/types/note';
-import { addMonths, buildMonthGrid, groupByDueDate, startOfMonth, toIsoDate } from '../../lib/calendar';
-import { NOTE_COLOR_CLASSES } from '../../lib/note-colors';
-import { displayTitle } from '../../lib/note-title';
+import type { Note } from '@shared/types/note'
+import { useMemo, useState } from 'react'
+import { addMonths, buildMonthGrid, groupByDueDate, startOfMonth, toIsoDate } from '../../lib/calendar'
+import { NOTE_COLOR_CLASSES } from '../../lib/note-colors'
+import { displayTitle } from '../../lib/note-title'
 
-const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-const monthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
+const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
+const monthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' })
 
 interface CalendarViewProps {
-  notes: Note[];
-  onOpen: (note: Note) => void;
+  notes: Note[]
+  onOpen: (note: Note) => void
 }
 
 /** Vista calendario: ogni nota compare nel giorno della sua scadenza. */
 export function CalendarView({ notes, onOpen }: CalendarViewProps) {
-  const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
-  const days = useMemo(() => buildMonthGrid(cursor), [cursor]);
-  const byDay = useMemo(() => groupByDueDate(notes), [notes]);
-  const today = toIsoDate(new Date());
+  const [cursor, setCursor] = useState(() => startOfMonth(new Date()))
+  const days = useMemo(() => buildMonthGrid(cursor), [cursor])
+  const byDay = useMemo(() => groupByDueDate(notes), [notes])
+  const today = toIsoDate(new Date())
 
   return (
     <section className="flex flex-col gap-3">
@@ -48,11 +48,14 @@ export function CalendarView({ notes, onOpen }: CalendarViewProps) {
           </div>
         ))}
         {days.map((day) => {
-          const iso = toIsoDate(day);
-          const dayNotes = byDay.get(iso) ?? [];
-          const inMonth = day.getMonth() === cursor.getMonth();
+          const iso = toIsoDate(day)
+          const dayNotes = byDay.get(iso) ?? []
+          const inMonth = day.getMonth() === cursor.getMonth()
           return (
-            <div key={iso} className={`min-h-24 bg-white p-1 dark:bg-zinc-900 ${inMonth ? '' : 'opacity-40'}`}>
+            <div
+              key={iso}
+              className={`min-h-24 bg-white p-1 dark:bg-zinc-900 ${inMonth ? '' : 'opacity-40'}`}
+            >
               <span
                 className={`inline-flex size-6 items-center justify-center rounded-full text-xs ${
                   iso === today ? 'bg-sky-600 text-white' : ''
@@ -73,9 +76,9 @@ export function CalendarView({ notes, onOpen }: CalendarViewProps) {
                 ))}
               </div>
             </div>
-          );
+          )
         })}
       </div>
     </section>
-  );
+  )
 }

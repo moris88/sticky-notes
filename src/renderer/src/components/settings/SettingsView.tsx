@@ -1,11 +1,11 @@
-import { THEMES, type AppSettings, type ThemeMode } from '@shared/types/settings';
+import { type AppSettings, THEMES, type ThemeMode } from '@shared/types/settings'
 
-const THEME_LABELS: Record<ThemeMode, string> = { light: 'Chiaro', dark: 'Scuro' };
+const THEME_LABELS: Record<ThemeMode, string> = { light: 'Chiaro', dark: 'Scuro' }
 
 interface SettingsViewProps {
-  settings: AppSettings;
-  onThemeChange: (theme: ThemeMode) => void;
-  onPickDirectory: () => void;
+  settings: AppSettings
+  onThemeChange: (theme: ThemeMode) => void
+  onPickDirectory: () => void
 }
 
 export function SettingsView({ settings, onThemeChange, onPickDirectory }: SettingsViewProps) {
@@ -28,21 +28,25 @@ export function SettingsView({ settings, onThemeChange, onPickDirectory }: Setti
         <h2 className="text-lg font-semibold">Tema</h2>
         <div role="radiogroup" className="flex gap-2">
           {THEMES.map((t) => (
-            <button
+            <label
               key={t}
-              type="button"
-              role="radio"
-              aria-checked={settings.theme === t}
-              onClick={() => onThemeChange(t)}
-              className={`rounded-md border px-4 py-2 ${
+              className={`cursor-pointer rounded-md border px-4 py-2 focus-within:ring-2 focus-within:ring-sky-600 ${
                 settings.theme === t ? 'border-sky-600 bg-sky-600/10' : 'border-zinc-300 dark:border-zinc-600'
               }`}
             >
+              <input
+                className="sr-only"
+                type="radio"
+                name="theme"
+                value={t}
+                checked={settings.theme === t}
+                onChange={() => onThemeChange(t)}
+              />
               {THEME_LABELS[t]}
-            </button>
+            </label>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }

@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron';
-import { IPC, type DesktopApi } from '@shared/ipc';
+import { type DesktopApi, IPC } from '@shared/ipc'
+import { contextBridge, ipcRenderer } from 'electron'
 
 // Espone solo le funzioni previste. Il renderer non ottiene ipcRenderer né Node.
 const api: DesktopApi = {
@@ -19,12 +19,12 @@ const api: DesktopApi = {
     isCollapsed: () => ipcRenderer.invoke(IPC.sticky.isCollapsed),
   },
   onNotesChanged: (listener) => {
-    const handler = () => listener();
-    ipcRenderer.on(IPC.events.notesChanged, handler);
+    const handler = () => listener()
+    ipcRenderer.on(IPC.events.notesChanged, handler)
     return () => {
-      ipcRenderer.removeListener(IPC.events.notesChanged, handler);
-    };
+      ipcRenderer.removeListener(IPC.events.notesChanged, handler)
+    }
   },
-};
+}
 
-contextBridge.exposeInMainWorld('desktop', api);
+contextBridge.exposeInMainWorld('desktop', api)
