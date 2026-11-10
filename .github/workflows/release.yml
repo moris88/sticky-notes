@@ -22,10 +22,10 @@ jobs:
         include:
           - os: windows-latest
             target: --win zip
-            files: dist/*.zip
+            files: release/*.zip
           - os: ubuntu-latest
             target: --linux zip AppImage deb
-            files: dist/*.zip dist/*.AppImage dist/*.deb
+            files: release/*.zip release/*.AppImage release/*.deb
     runs-on: ${{ matrix.os }}
     env:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
